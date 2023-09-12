@@ -52,3 +52,7 @@
 /.web-server-pid
 
 /node_modules
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
