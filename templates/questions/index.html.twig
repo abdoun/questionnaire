@@ -1,0 +1,117 @@
+{% extends 'users/dashboard.html.twig' %}
+
+{% block title %}Hello QuestionsController!{% endblock %}
+
+{% block body %}
+{% if app.session.get('username')!=null %}
+
+<div class="">
+    <h1>Questions for step: {{step.name}}</h1>
+    <table class="table table-hover">
+    <thead>
+        <tr>
+          <th scope="col">
+              <button class="btn-primary btn" 
+                      aria-hidden="true" 
+                      data-toggle="modal" 
+                      data-target=".bd-example-modal-lg" 
+                      onclick="$.get('{{ path('questions_new', {'stepId': step.id}) }}',function(data){$('#content_edit_modal_').html(data);} );">
+                  <span class="fa fa-plus fa-lg"></span>
+              </button>
+          </th>
+          <th scope="col">Active</th>
+          <th scope="col">Question type</th>
+          <th scope="col">Question text</th>
+          <th scope="col">Suggestions</th>
+          <th scope="col">Step</th>
+          <th scope="col">Answers</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for question in questions %}
+        <tr id="req_{{question.id}}">
+            <th scope="row">
+              <button class="btn-primary btn" 
+                    aria-hidden="true" 
+                    data-toggle="modal" 
+                    data-target=".bd-example-modal-lg" 
+                    onclick="$.get('{{ path('questions_new') }}?id={{question.id}}&stepId={{step.id}}',function(data){$('#content_edit_modal_').html(data);} );">
+                <span class="fa fa-pencil-square-o"></span>
+              </button>
+              <button class="btn-danger btn" 
+                    onclick="$(this).children().attr('class', 'fa fa-refresh fa-spin fa-1x fa-fw');$.get('{{ path('questions_delete', {'id': question.id}) }}',function(){$('#req_{{question.id}}').remove();} );">
+                <span class="fa fa-trash"></span>
+              </button>
+            </th>         
+            <td>
+              {% if(question.active) %}
+                <span class="fa fa-toggle-on" aria-hidden="true"></span>
+              {% else %}
+                <span class="fa fa-toggle-off" aria-hidden="true"></span>
+              {% endif %}
+            </td>
+            <td>{{question.getQuestionType()}}</td>
+            <td><textarea cols="50" rows="2">{{ question.getQuestionText() }}</textarea></td>
+            <td>              
+                {% if question.getQuestionType() == 'options' %}
+                <a href="{{ path('suggestions', {'id': question.id}) }}">Suggestions</a>
+                  <ul>
+                    {% for suggestion in question.getSuggestions() %}
+                      <li>{{suggestion.answer}} ({{answerSuggesionCount[suggestion.id]}})</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}              
+            </td>
+            <td><a href="{{ path('steps', {'id': step.getQuestionnaire().id}) }}">to steps</a></td>
+            <td>
+              <button type="button" 
+                      class="btn btn-primary"
+                      aria-hidden="true" 
+                      data-toggle="modal" 
+                      data-target=".bd-example-modal-lg"
+                      onclick="$.get('{{ path('answer_show', {'id': question.id}) }}',function(data){$('#content_edit_modal_').html(data);} );">
+                Answers <span class="badge badge-light">{{ answerCount[question.id] }}</span>
+              </button>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan='6'>No questions have been found.</td>
+        </tr>
+    {% endfor %}
+        
+        
+    </tbody>
+    </table>
+    
+</div>
+
+<script>
+    function loadingIco()
+    {
+        document.getElementById('content_edit_modal_').innerHTML='<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i><span class="sr-only">Loading...</span>';
+    }
+</script>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add/Edit a question</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="content_edit_modal_">
+        <div class="text-center">
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="javascript:loadingIco();location.reload();">Refresh all</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

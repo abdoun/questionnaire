@@ -1,0 +1,54 @@
+{% if app.session.get('username')!=null %}
+<form method="post" name="add_questionnaire" id="add_questionnaire" action="">
+<input type="hidden" name="id" value="{{ questionnaire.id }}" />
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="Name" required value="{{questionnaire.name}}" />
+    </div>
+    <div class="form-group col-md-6">
+      <label for="publish_date">Publish date</label>
+      <input type="date" class="form-control" id="publish_date" name="publish_date" placeholder="Publish Date" required value="{{ questionnaire.publishDate|date('Y-m-d') }}" />
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="language">Language</label>
+      <select class="form-control" id="language" name="language" placeholder="language" required>
+        <option value="en" {{questionnaire.language=='en' ? 'selected' : ''}}>Englisch</option>
+        <option value="de"{{questionnaire.language=='de' ? 'selected' : ''}}>Deutsch</option>
+        <option value="tr"{{questionnaire.language=='tr' ? 'selected' : ''}}>Türkisch</option>
+        <option value="ar"{{questionnaire.language=='ar' ? 'selected' : ''}}>عربي</option>
+      </select>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="active">Active</label>
+      <input type="checkbox" class="form-control" id="active" name="active" placeholder="active" {{questionnaire.active ? 'checked' : ''}}>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="description">Description</label>
+    <input type="text" class="form-control" id="description" name="description" placeholder="description" value="{{ questionnaire.description }}" />
+  </div>
+  <div class="form-group">
+    <label for="details">Details</label>
+    <textarea class="form-control" id="details" name="details" placeholder="Details">{{ questionnaire.details }}</textarea>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-2">
+        <button type="button" class="btn btn-primary" onclick="$(this).children().attr('class', 'fa fa-refresh fa-spin fa-1x fa-fw');$.post('{{ path('questionnaires_update') }}', $( '#add_questionnaire' ).serialize(),function(data){$('#content_edit_modal_').html(data);$('#span_update').attr('class', 'fa fa-floppy-o');} );">
+        Save <span id="span_update" class="fa fa-floppy-o" aria-hidden="true"></span>
+        </button>
+    </div>
+    <div class="form-group col-md-10">
+    {% if msg !='' %}
+        <div class="alert alert-{{ msg_class }}"  role="alert">{{ msg }} 
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    </div>
+  </div>
+</form>
+{% endif %}
