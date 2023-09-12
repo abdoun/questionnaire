@@ -1,0 +1,40 @@
+<form action="" name="next_form" id="next_form"  onsubmit="$('#span_update').attr('class', 'fa fa-refresh fa-spin fa-1x fa-fw');$.post('{{ path('attenders_next', {'id': step.id}) }}', $( '#next_form' ).serialize(),function(data){$('#step_content').html(data);$('#span_update').attr('class', 'fa fa-arrow-right');} );return false;">
+
+  {% if msg !='' %}
+    <div class="alert alert-{{msg_class}}"  role="alert">{{ msg }} 
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+  {% endif %}
+  <hr />
+  <h5>Step: {{step.name}}</h5>
+  {% for question in step.getQuestions %}                
+    <div class="form-group row">
+      <label for="{{question.id}}" class="col-sm-6 col-form-label">{{question.getQuestionText()}}:</label>
+      <div class="col-sm-6">
+      {% if question.getQuestionType()=='text' %}
+        <input type="text" class="form-control" id="{{question.id}}" name="{{question.id}}" placeholder="Answer" required />
+      {% else %}
+        <select class="form-control" id="{{question.id}}" name="{{question.id}}" required>
+          <option value="">Choose...</option>
+        {% for suggestion in question.getSuggestions() %}
+          <option value="{{suggestion.id}}">{{suggestion.answer}}</option>
+        {% endfor %}
+        </select>
+      {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  <hr />
+  <div class="form-row">
+    <div class="form-group col-md-3">
+        <button type="submit" class="btn btn-primary">
+        Next step <span id="span_update" class="fa fa-arrow-right" aria-hidden="true"></span>
+        </button>
+    </div>
+  </div>
+</form>
+            
+          
+ 

@@ -1,0 +1,97 @@
+{% extends 'users/dashboard.html.twig' %}
+
+{% block title %}Hello QuestionnairesController!{% endblock %}
+
+{% block body %}
+{% if app.session.get('username')!=null %}
+
+<div class="">
+    <h1>Steps for: {{questionnaire.name}}</h1>
+    <table class="table table-hover">
+    <thead>
+        <tr>
+          <th scope="col">
+              <button class="btn-primary btn" 
+                      aria-hidden="true" 
+                      data-toggle="modal" 
+                      data-target=".bd-example-modal-lg" 
+                      onclick="$.get('{{ path('steps_new', {'questionnaireId': questionnaire.id}) }}',function(data){$('#content_edit_modal_').html(data);} );">
+                  <span class="fa fa-plus fa-lg"></span>
+              </button>
+          </th>
+          <th scope="col">Order</th>
+          <th scope="col">Name</th>
+          <th scope="col">Active</th>
+          <th scope="col">Description</th>
+          <th scope="col">Questions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for step in steps %}
+        <tr id="req_{{step.id}}">
+            <th scope="row">
+              <button class="btn-primary btn" 
+                    aria-hidden="true" 
+                    data-toggle="modal" 
+                    data-target=".bd-example-modal-lg" 
+                    onclick="$.get('{{ path('steps_new') }}?id={{step.id}}&questionnaireId={{questionnaire.id}}',function(data){$('#content_edit_modal_').html(data);} );">
+                <span class="fa fa-pencil-square-o"></span>
+              </button>
+              <button class="btn-danger btn" 
+                    onclick="$(this).children().attr('class', 'fa fa-refresh fa-spin fa-1x fa-fw');$.get('{{ path('steps_delete', {'id': step.id}) }}',function(){$('#req_{{step.id}}').remove();} );">
+                <span class="fa fa-trash"></span>
+              </button>
+            </th>
+            <td>{{step.sort}}</td>
+            <td>{{step.name}}</td>
+            <td>
+              {% if(step.active) %}
+                <span class="fa fa-toggle-on" aria-hidden="true"></span>
+              {% else %}
+                <span class="fa fa-toggle-off" aria-hidden="true"></span>
+              {% endif %}
+            </td>
+            <td><textarea cols="50" rows="2">{{ step.description }}</textarea></td>
+            <td><a href="{{ path('questions', {'id': step.id}) }}">Questions({{step.getQuestions().count()}})</a></td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan='6'>No steps have been found.</td>
+        </tr>
+    {% endfor %}
+        
+        
+    </tbody>
+    </table>
+    
+</div>
+
+<script>
+    function loadingIco()
+    {
+        document.getElementById('content_edit_modal_').innerHTML='<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i><span class="sr-only">Loading...</span>';
+    }
+</script>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add/Edit a step</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="content_edit_modal_">
+        <div class="text-center">
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="javascript:loadingIco();location.reload();">Refresh all</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

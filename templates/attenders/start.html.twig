@@ -1,0 +1,24 @@
+{% extends "base.html.twig" %}
+  {% block body %}
+      <h2>{{ title}}</h2>
+     <!-- Content Row -->     
+    <div class="row">
+      <div class="card w-100">
+        <h5 class="card-header">{{ questionnaire.name }}</h5>
+        <div class="card-body">
+          <h5 class="card-title">{{ questionnaire.description }}</h5>
+          <p class="card-text">{{ questionnaire.details }}</p>
+          <div id="step_content">
+          
+            {% include('attenders/attendForm.html.twig') %}
+            
+          </div>
+          
+        </div>
+      </div>    
+
+    </div>
+    <!-- /.row -->
+  {% endblock %}
+
+ 

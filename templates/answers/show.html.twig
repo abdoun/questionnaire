@@ -1,0 +1,24 @@
+{% if app.session.get('username')!=null %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Answer</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for answer in answers %}
+        <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{answer.attender.nname}}</td>
+            <td><textarea col="50" row="3">{{answer.answer}}</textarea></td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan='3'>No answers have been found.</td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
