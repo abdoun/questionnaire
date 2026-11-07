@@ -29,6 +29,13 @@
         session data needed to maintain sign-in state and manage participation.
       </li>
     </ul>
+    <p>
+      <strong>Password storage:</strong> The application currently stores
+      passwords as MD5 hashes rather than in plaintext. MD5 is not suitable
+      for password storage by modern security standards; this is a known
+      security limitation and the application should not be used for real
+      accounts or sensitive information.
+    </p>
 
     <h2>Why data is processed</h2>
     <p>
@@ -53,9 +60,12 @@
       installation.
     </p>
     <p>
-      According to the operator, no external analytics or tracking services
-      are currently integrated. Questionnaire responses are available to the
-      creators of the relevant questionnaires within the application.
+      The application does not currently integrate with external APIs or
+      analytics or tracking services, and it does not load its scripts or
+      stylesheets from third-party CDNs. Frontend assets such as Bootstrap,
+      jQuery, and Font Awesome are served from this installation. Questionnaire
+      responses are available to the creators of the relevant questionnaires
+      within the application.
     </p>
 
     <h2>Data retention</h2>
