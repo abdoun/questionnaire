@@ -18,7 +18,7 @@ class Page extends AbstractController
     public function index() 
     {
         return $this->render('base.html.twig',[
-            'title'=>'Heme page'
+            'title'=>'Questionnaire'
         ]);
     }
 

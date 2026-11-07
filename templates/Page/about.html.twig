@@ -1,7 +1,32 @@
 {% extends "base.html.twig" %}
-  {% block body %}
-      <h2>{{ body}}</h2>
-     
-  {% endblock %}
-
- 
+{% block body %}
+  <section class="my-5" aria-labelledby="about-title">
+    <h1 id="about-title">About Questionnaire</h1>
+    <p class="lead">
+      Questionnaire is a small project for creating questionnaires, sharing
+      them with participants, and collecting responses.
+    </p>
+    <p>
+      Organize a questionnaire into steps, add questions and answer options,
+      then publish it for people to browse and complete. Participants can work
+      through the questions one step at a time.
+    </p>
+    <p>
+      Whether you are gathering feedback, running a poll, or collecting
+      information from a group, Questionnaire gives you one place to prepare
+      your questions and review the responses.
+    </p>
+    <p>
+      This project began as a learning exercise in 2020 and has recently been
+      upgraded. It is a personal, non-professional project and is not intended
+      as a production service.
+    </p>
+    <p>
+      Created by Abdullah Alaswad.
+      <a href="https://github.com/abdoun">Find me on GitHub</a>.
+    </p>
+    <a class="btn btn-primary mt-2" href="{{ path('questionnaires_browse') }}">
+      Browse questionnaires
+    </a>
+  </section>
+{% endblock %}
