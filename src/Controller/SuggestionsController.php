@@ -3,35 +3,29 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Questions;
 use App\Entity\Suggestions;
+use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @Route("/suggestions")
- */
+#[Route("/suggestions")]
 class SuggestionsController extends AbstractController
 {
-    private $session;
-
-    public function __construct(SessionInterface $session)
+    public function __construct(private RequestStack $requestStack, private ManagerRegistry $doctrine)
     {
-        $this->session = $session;
     }
 
-/**
-     * @Route("/new", name="suggestions_new", methods={"GET"})
-     */
+#[Route("/new", name: "suggestions_new", methods: ["GET"])]
     public function new(Request $request): Response
     {
         $msg = '';
         $msg_class = 'light';
         $suggestion = new Suggestions();
         if($request->get('id')!='') {
-            $repository = $this->getDoctrine()->getRepository(Suggestions::class);
+            $repository = $this->doctrine->getRepository(Suggestions::class);
             $suggestion = $repository->findOneBy(['id'=>$request->get('id')]);
         }
 
@@ -44,9 +38,7 @@ class SuggestionsController extends AbstractController
         
     }
 
-    /**
-     * @Route("/update", name="suggestions_update", methods={"GET","POST"})
-     */
+    #[Route("/update", name: "suggestions_update", methods: ["GET","POST"])]
     public function update(Request $request): Response
     {
         $msg = '';
@@ -57,7 +49,7 @@ class SuggestionsController extends AbstractController
             $msg_class = 'danger';
         } else {
             //$suggestion = new Suggestions();
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $msg = 'the step have been just added';
 
             if($request->get('id')!='') {
@@ -83,15 +75,12 @@ class SuggestionsController extends AbstractController
         ]);
     }
 
-     /**
-     * @Route("/delete/{id}", name="suggestions_delete", methods={"GET"})
-     * 
-     */
+     #[Route("/delete/{id}", name: "suggestions_delete", methods: ["GET"])]
     public function delete($id): Response
     {
         if($id!='') {
             $suggestion = new Suggestions();
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $suggestion = $entityManager->getRepository(Suggestions::class)->find($id);
             
             $entityManager->remove($suggestion);
@@ -100,21 +89,19 @@ class SuggestionsController extends AbstractController
         return new Response(null, 204);
     }
 
-    /**
-     * @Route("/{id}", name="suggestions", methods={"GET"})
-     */
+    #[Route("/{id}", name: "suggestions", methods: ["GET"])]
     public function index(Questions $question)
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
-        $repository = $this->getDoctrine()->getRepository(Suggestions::class);
+        $repository = $this->doctrine->getRepository(Suggestions::class);
         $suggestions = $repository->findBy(['question'=>$question->getId()],array('id' => 'ASC'));
 
         return $this->render('suggestions/index.html.twig', [
             'controller_name' => 'SuggestionsController',
             'title' => 'Questionnaires',
-            'head' => 'Userarea hallo: '.$this->session->get('username'),
+            'head' => 'Userarea hallo: '.$this->requestStack->getSession()->get('username'),
             'question' => $question,
             'suggestions' => $suggestions
         ]);
@@ -125,7 +112,7 @@ class SuggestionsController extends AbstractController
      */
     public function getQuestion($id): Questions
     {
-        $repository = $this->getDoctrine()->getRepository(Questions::class);
+        $repository = $this->doctrine->getRepository(Questions::class);
         $qeustion= $repository->findOneBy(['id'=>$id]);
         return $qeustion;
     }

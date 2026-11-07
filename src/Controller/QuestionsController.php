@@ -6,36 +6,30 @@ use App\Entity\Answers;
 use App\Entity\Questions;
 use App\Entity\Steps;
 use App\Entity\Suggestions;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route("/questions")
- */
+#[Route("/questions")]
 class QuestionsController extends AbstractController
 {
 
-    private $session;
-
-    public function __construct(SessionInterface $session)
+    public function __construct(private RequestStack $requestStack, private ManagerRegistry $doctrine)
     {
-        $this->session = $session;
     }
     
 
-    /**
-     * @Route("/new", name="questions_new", methods={"GET"})
-     */
+    #[Route("/new", name: "questions_new", methods: ["GET"])]
     public function new(Request $request): Response
     {
         $msg = '';
         $msg_class = 'light';
         $question = new Questions();
         if($request->get('id')!='') {
-            $repository = $this->getDoctrine()->getRepository(Questions::class);
+            $repository = $this->doctrine->getRepository(Questions::class);
             $question = $repository->findOneBy(['id'=>$request->get('id')]);
         }
 
@@ -48,9 +42,7 @@ class QuestionsController extends AbstractController
         
     }
 
-    /**
-     * @Route("/update", name="questions_update", methods={"GET","POST"})
-     */
+    #[Route("/update", name: "questions_update", methods: ["GET","POST"])]
     public function update(Request $request): Response
     {
         $msg = '';
@@ -61,7 +53,7 @@ class QuestionsController extends AbstractController
             $msg_class = 'danger';
         } else {
            
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $msg = 'the step have been just added';
 
             if($request->get('id')!='') {
@@ -87,15 +79,12 @@ class QuestionsController extends AbstractController
         ]);
     }
 
-     /**
-     * @Route("/delete/{id}", name="questions_delete", methods={"GET"})
-     * 
-     */
+     #[Route("/delete/{id}", name: "questions_delete", methods: ["GET"])]
     public function delete($id): Response
     {
         if($id!='') {
             $question = new Questions();
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $question = $entityManager->getRepository(Questions::class)->find($id);
             
             $entityManager->remove($question);
@@ -103,18 +92,16 @@ class QuestionsController extends AbstractController
         }           
         return new Response(null, 204);
     }
-    /**
-     * @Route("/{id}", name="questions", methods={"GET"})
-     */
+    #[Route("/{id}", name: "questions", methods: ["GET"])]
     public function index(Steps $step)
     {
 
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
-        $repository = $this->getDoctrine()->getRepository(Questions::class);
+        $repository = $this->doctrine->getRepository(Questions::class);
         $questions = $repository->findBy(['step'=>$step->getId()],array('id' => 'ASC'));
-        $answerRepository = $this->getDoctrine()->getRepository(Answers::class);
+        $answerRepository = $this->doctrine->getRepository(Answers::class);
         $answerCount = [];
         $answerSuggesionCount = [];
         foreach($questions as $question) {
@@ -127,7 +114,7 @@ class QuestionsController extends AbstractController
         return $this->render('questions/index.html.twig', [
             'controller_name' => 'QuestionsController',
             'title' => 'Questionnaires',
-            'head' => 'Userarea hallo: '.$this->session->get('username'),
+            'head' => 'Userarea hallo: '.$this->requestStack->getSession()->get('username'),
             'step' => $step,
             'questions' => $questions,
             'answerCount' => $answerCount,
@@ -140,7 +127,7 @@ class QuestionsController extends AbstractController
      */
     public function getStep($id): Steps
     {
-        $repository = $this->getDoctrine()->getRepository(Steps::class);
+        $repository = $this->doctrine->getRepository(Steps::class);
         $step= $repository->findOneBy(['id'=>$id]);
         return $step;
     }

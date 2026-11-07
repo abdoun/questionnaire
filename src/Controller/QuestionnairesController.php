@@ -3,51 +3,43 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Users;
 use App\Entity\Questionnaires;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @Route("/questionnaires")
- */
+#[Route("/questionnaires")]
 class QuestionnairesController extends AbstractController
 {
 
-    private $session;
-
-    public function __construct(SessionInterface $session)
+    public function __construct(private RequestStack $requestStack, private ManagerRegistry $doctrine)
     {
-        $this->session = $session;
     }
-    /**
-     * @Route("/", name="questionnaires")
-     */
+    #[Route("/", name: "questionnaires")]
     public function index(): Response
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
-        $repository = $this->getDoctrine()->getRepository(Questionnaires::class);
-        $questionnaires = $repository->findBy(['user'=>$this->getUser()]);
+        $repository = $this->doctrine->getRepository(Questionnaires::class);
+        $questionnaires = $repository->findBy(['user'=>$this->getUserObj()]);
         
         return $this->render('questionnaires/index.html.twig', [
             'controller_name' => 'QuestionnairesController',
             'title' => 'Questionnaires',
-            'head' => 'Userarea hallo: '.$this->session->get('username'),
+            'head' => 'Userarea hallo: '.$this->requestStack->getSession()->get('username'),
             'questionnaires'=>$questionnaires
         ]);
     }
 
-    /**
-     * @Route("/browse", name="questionnaires_browse")
-     */
+    #[Route("/browse", name: "questionnaires_browse")]
     public function browse(): Response
     {
 
-        $repository = $this->getDoctrine()->getRepository(Questionnaires::class);
+        $repository = $this->doctrine->getRepository(Questionnaires::class);
         $questionnaires = $repository->findBy(['active'=>1]);
         
         return $this->render('questionnaires/browse.html.twig', [
@@ -56,19 +48,17 @@ class QuestionnairesController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/new", name="questionnaires_new", methods={"GET"})
-     */
+    #[Route("/new", name: "questionnaires_new", methods: ["GET"])]
     public function new(Request $request): Response
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
         $msg = '';
         $msg_class = 'light';
         $questionnaire = new Questionnaires();
         if($request->get('id')!='') {
-            $repository = $this->getDoctrine()->getRepository(Questionnaires::class);
+            $repository = $this->doctrine->getRepository(Questionnaires::class);
             $questionnaire = $repository->findOneBy(['id'=>$request->get('id')]);
         }
         return $this->render('questionnaires/new.html.twig', [            
@@ -78,12 +68,10 @@ class QuestionnairesController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/update", name="questionnaires_update", methods={"GET","POST"})
-     */
+    #[Route("/update", name: "questionnaires_update", methods: ["GET","POST"])]
     public function update(Request $request): Response
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
         //var_dump($request->request->all());//exit;
@@ -96,7 +84,7 @@ class QuestionnairesController extends AbstractController
             $msg_class = 'danger';
         } else {
             
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $msg = 'the Questionnaire have been just added';
 
             if($request->get('id')!='') {
@@ -128,17 +116,15 @@ class QuestionnairesController extends AbstractController
         ]);
     }
     
-    /**
-     * @Route("/delete", name="questionnaires_delete", methods={"GET"})
-     */
+    #[Route("/delete", name: "questionnaires_delete", methods: ["GET"])]
     public function delete(Request $request): Response
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
         if($request->get('id')!='') {
             $questionnaire = new Questionnaires();
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->doctrine->getManager();
             $questionnaire = $entityManager->getRepository(Questionnaires::class)->find($request->get('id'));
             $entityManager->remove($questionnaire);
             $entityManager->flush();
@@ -146,22 +132,12 @@ class QuestionnairesController extends AbstractController
         return new Response(null, 204);
     }
     /**
-     * return int
-     */
-    public function getUser()
-    {
-        $repository = $this->getDoctrine()->getRepository(Users::class);
-        $user= $repository->findOneBy(['username'=>$this->session->get('username')]);
-        return $user->getId();
-    }
-
-    /**
      * return obj
      */
     public function getUserObj()
     {
-        $repository = $this->getDoctrine()->getRepository(Users::class);
-        $user= $repository->findOneBy(['username'=>$this->session->get('username')]);
+        $repository = $this->doctrine->getRepository(Users::class);
+        $user= $repository->findOneBy(['username'=>$this->requestStack->getSession()->get('username')]);
         return $user;
     }
 }

@@ -7,46 +7,30 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=QuestionsRepository::class)
- */
+#[ORM\Entity(repositoryClass: QuestionsRepository::class)]
 class Questions
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: "string", length: 255)]
     private $question_text;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: "boolean")]
     private $active;
 
-    /**
-     * @ORM\Column(type="string", length=10)
-     */
+    #[ORM\Column(type: "string", length: 10)]
     private $question_type;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Steps::class, inversedBy="questions")
-     */
+    #[ORM\ManyToOne(targetEntity: Steps::class, inversedBy: "questions")]
     private $step;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Suggestions::class, mappedBy="question")
-     */
+    #[ORM\OneToMany(targetEntity: Suggestions::class, mappedBy: "question")]
     private $suggestions;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Suggestions::class, mappedBy="question")
-     */
+    #[ORM\OneToMany(targetEntity: Suggestions::class, mappedBy: "question")]
     private $question;
 
     public function __construct()

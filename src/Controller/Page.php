@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 
@@ -14,9 +14,7 @@ class Page extends AbstractController
     {
         
     }
-    /**
-     * @Route("/", name="homepage")
-     */
+    #[Route("/", name: "homepage")]
     public function index() 
     {
         return $this->render('base.html.twig',[
@@ -24,9 +22,7 @@ class Page extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/about", name="about")
-     */
+    #[Route("/about", name: "about")]
     public function about() 
     {
         return $this->render('Page/about.html.twig',[

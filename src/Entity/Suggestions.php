@@ -5,32 +5,22 @@ namespace App\Entity;
 use App\Repository\SuggestionsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=SuggestionsRepository::class)
- */
+#[ORM\Entity(repositoryClass: SuggestionsRepository::class)]
 class Suggestions
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: "string", length: 255)]
     private $answer;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: "boolean", nullable: true)]
     private $active;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Questions::class, inversedBy="question")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: Questions::class, inversedBy: "question")]
+    #[ORM\JoinColumn(nullable: false)]
     private $question;
 
     public function getId(): ?int

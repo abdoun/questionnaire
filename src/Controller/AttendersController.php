@@ -7,28 +7,22 @@ use App\Entity\Attenders;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Questionnaires;
 use App\Entity\Steps;
+use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @Route("/attenders")
- */
+#[Route("/attenders")]
 class AttendersController extends AbstractController
 {
-    private $session;
-
-    public function __construct(SessionInterface $session)
+    public function __construct(private RequestStack $requestStack, private ManagerRegistry $doctrine)
     {
-        $this->session = $session;
     }
-    /**
-     * @Route("/", name="attenders")
-     */
+    #[Route("/", name: "attenders")]
     public function index()
     {
-        if($this->session->get('username') === null) {
+        if($this->requestStack->getSession()->get('username') === null) {
             return $this->redirectToRoute('users_login');
         }
         return $this->render('attenders/index.html.twig', [
@@ -36,9 +30,7 @@ class AttendersController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/start/{id}", name="attenders_start")
-     */
+    #[Route("/start/{id}", name: "attenders_start")]
     public function start(Questionnaires $questionnaire, $msg=''): Response
     {
         $steps = $questionnaire->getStep();
@@ -63,9 +55,7 @@ class AttendersController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/next/{id}", name="attenders_next")
-     */
+    #[Route("/next/{id}", name: "attenders_next")]
     public function next(Request $request,Steps $step): Response
     {
         if($request->get('nname') !== null && $request->get('nname') == '') {
@@ -74,10 +64,10 @@ class AttendersController extends AbstractController
         if($request->get('email') !== null && $request->get('email') == '') {
             return $this->start($step->getQuestionnaire(), 'Sorry, you have not filled the Email field');
         }
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->doctrine->getManager();
         $attender = new Attenders();
         //TODO: add to attenders table and get the Id
-        if($this->session->get('attender_id') === null) {
+        if($this->requestStack->getSession()->get('attender_id') === null) {
             
             
             $attender->setNname($request->get('nname'));
@@ -85,11 +75,11 @@ class AttendersController extends AbstractController
             $attender->setAttendDate( new \DateTime() );
             $entityManager->persist($attender);
             $entityManager->flush();
-            $this->session->set('attender_id',$attender->getId());
+            $this->requestStack->getSession()->set('attender_id',$attender->getId());
         } else {
-            $attender = $entityManager->getRepository(Attenders::class)->find($this->session->get('attender_id'));
+            $attender = $entityManager->getRepository(Attenders::class)->find($this->requestStack->getSession()->get('attender_id'));
         }
-        //var_dump($this->session->get('attender_id'));exit();
+        //var_dump($this->requestStack->getSession()->get('attender_id'));exit();
         
 
         $msg = '';
@@ -140,7 +130,7 @@ class AttendersController extends AbstractController
             
         }
         if($step === null) {
-            $this->session->remove('attender_id');
+            $this->requestStack->getSession()->remove('attender_id');
             return new Response('Thanks, End of questionnaire');
         }
         

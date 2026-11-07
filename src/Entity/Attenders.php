@@ -7,36 +7,24 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=AttendersRepository::class)
- */
+#[ORM\Entity(repositoryClass: AttendersRepository::class)]
 class Attenders
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: "string", length: 100)]
     private $nname;
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: "string", length: 100)]
     private $email;
 
-    /**
-     * @ORM\Column(type="date")
-     */
+    #[ORM\Column(type: "date")]
     private $attend_date;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Answers::class, mappedBy="attender")
-     */
+    #[ORM\OneToMany(targetEntity: Answers::class, mappedBy: "attender")]
     private $answer;
 
     public function __construct()

@@ -7,57 +7,37 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=QuestionnairesRepository::class)
- */
+#[ORM\Entity(repositoryClass: QuestionnairesRepository::class)]
 class Questionnaires
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: "string", length: 100)]
     private $name;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Users::class, inversedBy="questionnaire")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: Users::class, inversedBy: "questionnaire")]
+    #[ORM\JoinColumn(nullable: false)]
     private $user;
 
-    /**
-     * @ORM\Column(type="date")
-     */
+    #[ORM\Column(type: "date")]
     private $publish_date;
 
-    /**
-     * @ORM\Column(type="string", length=3, nullable=true)
-     */
+    #[ORM\Column(type: "string", length: 3, nullable: true)]
     private $language;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
     private $description;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: "text", nullable: true)]
     private $details;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: "boolean")]
     private $active;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Steps::class, mappedBy="questionnaire")
-     */
+    #[ORM\OneToMany(targetEntity: Steps::class, mappedBy: "questionnaire")]
     private $step;
 
     public function __construct()

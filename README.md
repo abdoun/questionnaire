@@ -6,8 +6,8 @@ and collect responses from participants.
 
 ## Technology
 
-- PHP `^7.2.5`
-- Symfony 5.1
+- PHP 8.4.27
+- Symfony 7.4 LTS
 - Doctrine ORM and Doctrine Migrations
 - MySQL-compatible database (the migrations use MySQL syntax)
 - Twig templates
