@@ -30,5 +30,13 @@ class Page extends AbstractController
             'body'=>'About'
         ]);
     }
+
+    #[Route("/privacy", name: "privacy")]
+    public function privacy()
+    {
+        return $this->render('Page/privacy.html.twig', [
+            'title' => 'Privacy notice',
+        ]);
+    }
     
 }

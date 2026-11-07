@@ -1,0 +1,83 @@
+{% extends "base.html.twig" %}
+{% block body %}
+  <section class="my-5" aria-labelledby="privacy-title">
+    <h1 id="privacy-title">Privacy notice</h1>
+    <div class="alert alert-warning" role="note">
+      <strong>Project status:</strong>
+      This is currently a local exercise project, not a professional or
+      production service. This notice is not legal advice. Before making the
+      application publicly available, the operator must review and complete
+      the contact, hosting, and legal-basis information below.
+    </div>
+
+    <h2>Data controller</h2>
+    <p>
+      The project is operated by Abdullah Alaswad. A postal address and a
+      contact address for privacy requests have not yet been provided and must
+      be added before public deployment.
+    </p>
+
+    <h2>Personal data processed</h2>
+    <p>Depending on how the application is used, it may process:</p>
+    <ul>
+      <li>account details, including usernames, email addresses, and password data;</li>
+      <li>
+        participant names, email addresses, and answers submitted to
+        questionnaires;
+      </li>
+      <li>
+        session data needed to maintain sign-in state and manage participation.
+      </li>
+    </ul>
+
+    <h2>Why data is processed</h2>
+    <p>
+      Data is used to manage accounts and questionnaires, enable participation,
+      and associate submitted answers with the relevant questionnaire.
+      Questionnaire creators can view responses submitted to their
+      questionnaires.
+    </p>
+
+    <h2>Sessions and cookies</h2>
+    <p>
+      The application uses technically necessary session cookies to maintain
+      sign-in state and participation across requests. These cookies are not
+      used for cross-site advertising or tracking.
+    </p>
+
+    <h2>Hosting and recipients</h2>
+    <p>
+      Any future server hosting is intended to be in Germany. The hosting
+      provider and its privacy information have not yet been specified. In
+      local use, data is stored in the database configured for that
+      installation.
+    </p>
+    <p>
+      According to the operator, no external analytics or tracking services
+      are currently integrated. Questionnaire responses are available to the
+      creators of the relevant questionnaires within the application.
+    </p>
+
+    <h2>Data retention</h2>
+    <p>
+      The application does not currently enforce an automatic deletion
+      schedule. Account, participation, and response data may remain in the
+      database until deleted manually or the database is reset. A retention
+      and deletion policy must be established before public deployment.
+    </p>
+
+    <h2>Legal basis and your rights</h2>
+    <p>
+      The appropriate legal basis depends on how the application is operated
+      publicly. The controller must determine and document it before
+      production use.
+    </p>
+    <p>
+      Subject to applicable data-protection law, individuals may have the
+      right to request access to, correction or deletion of their data, or
+      restriction of its processing, and to lodge a complaint with a
+      supervisory authority. A valid contact address for the controller must
+      be provided before public deployment so requests can be handled.
+    </p>
+  </section>
+{% endblock %}

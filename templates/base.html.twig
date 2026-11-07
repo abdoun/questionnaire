@@ -56,6 +56,11 @@
 
   <!-- Page Content -->
   <div class="container">
+    <div class="alert alert-info mt-4 mb-0" role="note">
+      This application uses necessary session cookies and stores questionnaire
+      responses. No external analytics or tracking services are currently used.
+      <a href="{{ path('privacy') }}" class="alert-link">Privacy notice</a>
+    </div>
   {% block usermenu %}{% endblock %}
     {% block body %}
     <!-- Heading Row -->
@@ -129,6 +134,9 @@
   <footer class="py-5 bg-dark">
     <div class="container">
       <p class="m-0 text-center text-white">Questionnaire &middot; Exercise project, 2020</p>
+      <p class="m-0 mt-2 text-center">
+        <a class="text-white" href="{{ path('privacy') }}">Privacy notice</a>
+      </p>
     </div>
     <!-- /.container -->
   </footer>
