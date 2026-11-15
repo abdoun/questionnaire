@@ -1,0 +1,25 @@
+
+name: Build and Deploy Questionnaire
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: questionnaire-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and deploy
+        run: sudo -n /usr/local/sbin/deploy-questionnaire
