@@ -15,6 +15,7 @@ and collect responses from participants.
 ## Requirements
 
 - PHP and the extensions required by Composer
+- PHP GD with FreeType support (used to generate CAPTCHA images)
 - Composer
 - MySQL or MariaDB
 

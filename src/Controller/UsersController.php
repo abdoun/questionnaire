@@ -125,22 +125,34 @@ class UsersController extends AbstractController
 #[Route("/imccaptcha/{rand}", name: "imccaptcha")]
     public function imgcaptcha(int $rand=1): Response
 	{
-		srand((double)microtime()*1000000000); 
-		$string = md5(rand(0,999999));
-        $this->requestStack->getSession()->set("new_string",strtoupper( substr($string, 17, 4)));
-        $im = imagecreatetruecolor(160, 80);
-        $white = ImageColorAllocate($im, 255, 255, 255); 
-        $grey = ImageColorAllocate($im, 38, 90, 136);
-        $black = imagecolorallocate($im, 0, 0, 0);
+        $string = md5(random_int(0, 999999));
+        $captcha = strtoupper(substr($string, 17, 4));
+        $this->requestStack->getSession()->set("new_string", $captcha);
+        $image = imagecreatetruecolor(160, 80);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $grey = imagecolorallocate($image, 38, 90, 136);
+        $black = imagecolorallocate($image, 0, 0, 0);
 
-        ImageFill($im, 0, 0, $grey);
-        //ImageString($im, 7, 80, 10, $_SESSION[new_string], $white);
-        imagettftext($im,35,10,25,70,$black,'fonts/verdana.ttf',$this->requestStack->getSession()->get('new_string'));
-        imagettftext($im,35,10,20,65,$white,'fonts/verdana.ttf',$this->requestStack->getSession()->get('new_string'));
+        imagefill($image, 0, 0, $grey);
+        $fontPath = $this->getParameter('kernel.project_dir') . '/public/fonts/verdana.ttf';
+        imagettftext($image, 35, 10, 25, 70, $black, $fontPath, $captcha);
+        imagettftext($image, 35, 10, 20, 65, $white, $fontPath, $captcha);
 
-		return new Response(
-            header('Content-type: image/png').imagepng($im).imagedestroy($im)
-        );
+        ob_start();
+        try {
+            if (!imagepng($image)) {
+                throw new \RuntimeException('Failed to generate CAPTCHA image.');
+            }
+            $imageData = ob_get_contents();
+            if ($imageData === false) {
+                throw new \RuntimeException('Failed to read generated CAPTCHA image.');
+            }
+        } finally {
+            ob_end_clean();
+            imagedestroy($image);
+        }
+
+        return new Response($imageData, Response::HTTP_OK, ['Content-Type' => 'image/png']);
 	}
     
 

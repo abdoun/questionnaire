@@ -15,10 +15,15 @@ RUN composer install \
 FROM php:8.4.27-apache
 
 RUN apt-get update && apt-get install -y \
+    libfreetype6-dev \
     libicu-dev \
+    libjpeg62-turbo-dev \
     libzip-dev \
+    libpng-dev \
     unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
+       gd \
        pdo_mysql \
        intl \
        opcache \
