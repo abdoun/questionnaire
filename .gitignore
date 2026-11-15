@@ -59,4 +59,4 @@
 
 .env
 .env.local
-.env.*
+.env.docker
