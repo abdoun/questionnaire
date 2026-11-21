@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Form\UsersType;
+use App\Form\SignupType;
 use App\Repository\UsersRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -80,6 +81,69 @@ class UsersController extends AbstractController
             'msg'=>''
         ]);
     }
+
+    #[Route("/signup", name: "users_signup", methods: ["GET", "POST"])]
+    public function signup(Request $request, UsersRepository $userRepo): Response
+    {
+        if ($this->requestStack->getSession()->get('username') !== null) {
+            return $this->redirectToRoute('users_dashboard');
+        }
+
+        $user = new Users();
+        $form = $this->createForm(SignupType::class, $user);
+        $form->handleRequest($request);
+        $msg = '';
+        $formErrors = [];
+
+        if ($form->isSubmitted()) {
+            $captcha = strtoupper(trim((string) $request->get('code_captcha')));
+            $sessionCaptcha = (string) $this->requestStack->getSession()->get('new_string');
+
+            if ($sessionCaptcha === '' || $captcha !== $sessionCaptcha) {
+                $msg = 'Code is wrong';
+            } elseif (!$form->isValid()) {
+                foreach ($form->getErrors(true, true) as $error) {
+                    $formErrors[] = $error->getMessage();
+                }
+
+                if ($formErrors === []) {
+                    $msg = 'Please correct the highlighted fields and try again.';
+                }
+            } else {
+                $username = trim((string) $user->getUsername());
+                $email = trim((string) $user->getEmail());
+
+                if ($userRepo->findOneBy(['username' => $username])) {
+                    $msg = 'This username is already taken';
+                } elseif ($userRepo->findOneBy(['email' => $email])) {
+                    $msg = 'This email address is already registered';
+                } else {
+                    $user->setUsername($username);
+                    $user->setEmail($email);
+                    $user->setPassword(password_hash((string) $user->getPassword(), PASSWORD_DEFAULT));
+                    $user->setActive(true);
+                    $user->setLevel('user');
+
+                    $entityManager = $this->doctrine->getManager();
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    $this->requestStack->getSession()->set('username', $user->getUsername());
+                    $this->requestStack->getSession()->remove('new_string');
+
+                    return $this->redirectToRoute('users_dashboard');
+                }
+            }
+        }
+
+        return $this->render('users/signup.html.twig', [
+            'form' => $form->createView(),
+            'title' => 'Sign up',
+            'head' => 'Create an account',
+            'msg' => $msg,
+            'formErrors' => $formErrors,
+        ]);
+    }
     #[Route("/signout", name: "users_signout")]
     public function signout(): Response
     {
@@ -100,15 +164,24 @@ class UsersController extends AbstractController
         } elseif($this->requestStack->getSession()->get('new_string') != $request->get('code_capthca')) {
             $msg = 'Code is wrong';
         } else {
-            $userCount = $userRepo->count([
-                'username'=>$request->get('username'),
-                'password'=>md5($request->get('password')),
-                'active'=>1
+            $user = $userRepo->findOneBy([
+                'username' => $request->get('username'),
+                'active' => 1
             ]);
-            if(!$userCount) {
+            $password = (string) $request->get('password');
+            $passwordValid = $user !== null && (
+                password_verify($password, (string) $user->getPassword())
+                || hash_equals((string) $user->getPassword(), md5($password))
+            );
+
+            if (!$passwordValid) {
                 $msg = 'Sorry, there is no user with this username and password';
             } else {
                 $msg = 'thanks';
+                if (password_needs_rehash((string) $user->getPassword(), PASSWORD_DEFAULT)) {
+                    $user->setPassword(password_hash($password, PASSWORD_DEFAULT));
+                    $this->doctrine->getManager()->flush();
+                }
                 $this->requestStack->getSession()->set('username',$request->get('username'));
                 return $this->redirectToRoute('users_dashboard');
             }

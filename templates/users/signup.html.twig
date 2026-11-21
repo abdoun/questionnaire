@@ -1,0 +1,75 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<div class="card w-75" style="margin: 30px;">
+  <div class="card-header">
+    {{ head }}
+  </div>
+  <div class="card-body">
+    {% if msg %}
+      <div class="alert alert-danger" role="alert">{{ msg }}</div>
+    {% endif %}
+    {% if formErrors %}
+      <div class="alert alert-danger" role="alert">
+        <strong>Please correct the following:</strong>
+        <ul class="mb-0">
+          {% for error in formErrors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {{ form_errors(form) }}
+
+    {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+      <div class="form-group row">
+        {{ form_label(form.username, 'Username:', {'label_attr': {'class': 'col-sm-3 control-label'}}) }}
+        <div class="col-sm-9 col-md-6">
+          {{ form_widget(form.username, {'attr': {'class': 'form-control', 'placeholder': 'Username'}}) }}
+          {{ form_errors(form.username) }}
+        </div>
+      </div>
+      <div class="form-group row">
+        {{ form_label(form.email, 'Email:', {'label_attr': {'class': 'col-sm-3 control-label'}}) }}
+        <div class="col-sm-9 col-md-6">
+          {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+          {{ form_errors(form.email) }}
+        </div>
+      </div>
+      <div class="form-group row">
+        {{ form_label(form.password.first, 'Password:', {'label_attr': {'class': 'col-sm-3 control-label'}}) }}
+        <div class="col-sm-9 col-md-6">
+          {{ form_widget(form.password.first, {'attr': {'class': 'form-control', 'placeholder': 'Password'}}) }}
+        </div>
+      </div>
+      <div class="form-group row">
+        {{ form_label(form.password.second, 'Repeat Password:', {'label_attr': {'class': 'col-sm-3 control-label'}}) }}
+        <div class="col-sm-9 col-md-6">
+          {{ form_widget(form.password.second, {'attr': {'class': 'form-control', 'placeholder': 'Repeat Password'}}) }}
+          {{ form_errors(form.password) }}
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="code_captcha" class="col-sm-3 control-label">Code:</label>
+        <div class="col-xs-10 col-sm-3">
+          <input type="text" class="form-control" id="code_captcha" name="code_captcha" placeholder="Code" autocomplete="off" onkeyup="this.value=this.value.toUpperCase().trim();">
+        </div>
+        <div class="col-xs-4 col-md-3">
+          <img class="img-thumbnail" src="{{ path('imccaptcha') }}" width="80" height="40" id="signup_captcha_img" alt="Security code">
+          <button type="button" class="btn btn-default" aria-label="Refresh code" onclick="document.getElementById('signup_captcha_img').src = '{{ path('imccaptcha') }}/' + Math.random();return false;">
+            <span class="fa fa-refresh" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-6">
+          <button type="submit" class="btn btn-primary">Sign up</button>
+          <a class="ml-2" href="{{ path('users_login') }}">Already have an account?</a>
+        </div>
+      </div>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}

@@ -47,7 +47,7 @@
             <a class="nav-link" href="{{path('questionnaires_browse')}}">Questionnaires</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% if app.session.get('username')!=null %} {{path('users_signout')}} {% else %} {{path('users_login')}} {% endif %}">{% if app.session.get('username')!=null %} Logout {% else %} Login {% endif %}</a>
+            <a class="nav-link" href="{% if app.session.get('username')!=null %} {{path('users_signout')}} {% else %} {{path('users_login')}} {% endif %}">{% if app.session.get('username')!=null %} Logout {% else %} Login{% endif %}</a>
           </li>
         </ul>
       </div>
