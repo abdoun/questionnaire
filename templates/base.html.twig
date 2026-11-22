@@ -56,7 +56,10 @@
 
   <!-- Page Content -->
   <div class="container">
-    <div class="alert alert-info mt-4 mb-0" role="note">
+    <div id="privacy-notice" class="alert alert-info alert-dismissible mt-4 mb-0" role="note">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
       This application uses necessary session cookies and stores questionnaire
       responses. No external analytics or tracking services are currently used.
       <a href="{{ path('privacy') }}" class="alert-link">Privacy notice</a>
@@ -144,6 +147,25 @@
   <!-- Bootstrap core JavaScript -->
   <script src="{{asset('vendor/jquery/jquery.min.js')}}"></script>
   <script src="{{asset('vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+  <script>
+    $(function () {
+      var cookieName = 'questionnaire_notice_dismissed';
+      var notice = $('#privacy-notice');
+      var isDismissed = document.cookie.split(';').some(function (cookie) {
+        return cookie.trim().indexOf(cookieName + '=') === 0;
+      });
+
+      if (isDismissed) {
+        notice.hide();
+        return;
+      }
+
+      notice.on('close.bs.alert', function () {
+        document.cookie = cookieName + '=1; max-age=604800; path=/; SameSite=Lax' +
+          (window.location.protocol === 'https:' ? '; Secure' : '');
+      });
+    });
+  </script>
 
 </body>
 
