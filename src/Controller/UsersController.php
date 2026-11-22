@@ -23,15 +23,19 @@ class UsersController extends AbstractController
 
     #[Route("/", name: "users_index", methods: ["GET"])]
     public function index(UsersRepository $usersRepository)
-    
     {
-        if($this->requestStack->getSession()->get('username') === null) {
+        $currentUser = $this->getCurrentUser($usersRepository);
+        if ($currentUser === null) {
             return $this->redirectToRoute('users_login');
         }
+
+        $isAdmin = $this->isAdmin($currentUser);
+
         return $this->render('users/index.html.twig', [
-            'users' => $usersRepository->findAll(),
+            'users' => $isAdmin ? $usersRepository->findAll() : [$currentUser],
+            'isAdmin' => $isAdmin,
             'title'=>'Userarea',
-            'head' => 'Userarea hallo: '.$this->requestStack->getSession()->get('username')
+            'head' => 'Userarea hallo: '.$currentUser->getUsername()
         ]);
     }
     #[Route("/dashboard", name: "users_dashboard", methods: ["GET"])]
@@ -47,14 +51,22 @@ class UsersController extends AbstractController
     }
 
     #[Route("/new", name: "users_new", methods: ["GET","POST"])]
-    public function new(Request $request): Response
+    public function new(Request $request, UsersRepository $usersRepository): Response
     {
+        $currentUser = $this->getCurrentUser($usersRepository);
+        if ($currentUser === null) {
+            return $this->redirectToRoute('users_login');
+        }
+        if (!$this->isAdmin($currentUser)) {
+            throw $this->createAccessDeniedException();
+        }
+
         $user = new Users();
-        $form = $this->createForm(UsersType::class, $user);
+        $form = $this->createForm(UsersType::class, $user, ['is_admin' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setPassword(md5($user->getPassword()));
+            $user->setPassword(password_hash((string) $user->getPassword(), PASSWORD_DEFAULT));
             $entityManager = $this->doctrine->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
@@ -230,10 +242,17 @@ class UsersController extends AbstractController
     
 
     #[Route("/{id}", name: "users_show", methods: ["GET"])]
-    public function show(Users $user): Response
+    public function show(Users $user, UsersRepository $usersRepository): Response
     {
+        $currentUser = $this->getCurrentUser($usersRepository);
+        if ($currentUser === null) {
+            return $this->redirectToRoute('users_login');
+        }
+        $this->denyUnlessCanAccessUser($currentUser, $user);
+
         return $this->render('users/show.html.twig', [
             'user' => $user,
+            'isAdmin' => $this->isAdmin($currentUser),
             'title'=>'Login',
             'head' => 'Login',
         ]);
@@ -241,17 +260,33 @@ class UsersController extends AbstractController
     
 
     #[Route("/{id}/edit", name: "users_edit", methods: ["GET","POST"])]
-    public function edit(Request $request, Users $user): Response
+    public function edit(Request $request, Users $user, UsersRepository $usersRepository): Response
     {
+        $currentUser = $this->getCurrentUser($usersRepository);
+        if ($currentUser === null) {
+            return $this->redirectToRoute('users_login');
+        }
+        $this->denyUnlessCanAccessUser($currentUser, $user);
+
+        $originalPassword = $user->getPassword();
         $user->setPassword('');
-        $form = $this->createForm(UsersType::class, $user);
+        $isAdmin = $this->isAdmin($currentUser);
+        $form = $this->createForm(UsersType::class, $user, [
+            'is_admin' => $isAdmin,
+            'is_edit' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if($user->getPassword() !== null) {
-                $user->setPassword(md5($user->getPassword()));
-            }            
+            $password = (string) $user->getPassword();
+            $user->setPassword($password === ''
+                ? (string) $originalPassword
+                : password_hash($password, PASSWORD_DEFAULT));
             $this->doctrine->getManager()->flush();
+
+            if ($currentUser->getId() === $user->getId()) {
+                $this->requestStack->getSession()->set('username', $user->getUsername());
+            }
 
             return $this->redirectToRoute('users_index');
         }
@@ -259,14 +294,23 @@ class UsersController extends AbstractController
         return $this->render('users/edit.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+            'isAdmin' => $isAdmin,
             'title'=>'Edit',
             'head' => 'Edit user',
         ]);
     }
 
     #[Route("/{id}", name: "users_delete", methods: ["DELETE"])]
-    public function delete(Request $request, Users $user): Response
+    public function delete(Request $request, Users $user, UsersRepository $usersRepository): Response
     {
+        $currentUser = $this->getCurrentUser($usersRepository);
+        if ($currentUser === null) {
+            return $this->redirectToRoute('users_login');
+        }
+        if (!$this->isAdmin($currentUser)) {
+            throw $this->createAccessDeniedException();
+        }
+
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
             $entityManager = $this->doctrine->getManager();
             $entityManager->remove($user);
@@ -276,5 +320,30 @@ class UsersController extends AbstractController
         return $this->redirectToRoute('users_index');
     }
 
-    
+    private function getCurrentUser(UsersRepository $usersRepository): ?Users
+    {
+        $username = $this->requestStack->getSession()->get('username');
+        if (!is_string($username) || $username === '') {
+            return null;
+        }
+
+        $user = $usersRepository->findOneBy(['username' => $username, 'active' => true]);
+        if ($user === null) {
+            $this->requestStack->getSession()->remove('username');
+        }
+
+        return $user;
+    }
+
+    private function isAdmin(Users $user): bool
+    {
+        return $user->getLevel() === 'admin';
+    }
+
+    private function denyUnlessCanAccessUser(Users $currentUser, Users $targetUser): void
+    {
+        if (!$this->isAdmin($currentUser) && $currentUser->getId() !== $targetUser->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+    }
 }

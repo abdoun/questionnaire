@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\Users;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,17 +15,25 @@ class UsersType extends AbstractType
     {
         $builder
             ->add('username')
-            ->add('password')
+            ->add('password', PasswordType::class, ['required' => !$options['is_edit']])
             ->add('email')
-            ->add('active')
-            ->add('level')
         ;
+
+        if ($options['is_admin']) {
+            $builder
+                ->add('active', CheckboxType::class)
+                ->add('level');
+        }
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Users::class,
+            'is_admin' => false,
+            'is_edit' => false,
         ]);
+        $resolver->setAllowedTypes('is_admin', 'bool');
+        $resolver->setAllowedTypes('is_edit', 'bool');
     }
 }

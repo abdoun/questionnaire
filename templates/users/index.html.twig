@@ -12,8 +12,10 @@
                 <th>Username</th>
                 
                 <th>Email</th>
-                <th>Active</th>
-                <th>Level</th>
+                {% if isAdmin %}
+                    <th>Active</th>
+                    <th>Level</th>
+                {% endif %}
                 <th>actions</th>
             </tr>
         </thead>
@@ -24,8 +26,10 @@
                 <td>{{ user.username }}</td>
                 
                 <td>{{ user.email }}</td>
-                <td>{{ user.active ? 'Yes' : 'No' }}</td>
-                <td>{{ user.level }}</td>
+                {% if isAdmin %}
+                    <td>{{ user.active ? 'Yes' : 'No' }}</td>
+                    <td>{{ user.level }}</td>
+                {% endif %}
                 <td>
                     <a href="{{ path('users_show', {'id': user.id}) }}">show</a>
                     <a href="{{ path('users_edit', {'id': user.id}) }}">edit</a>
@@ -33,11 +37,13 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="{{ isAdmin ? 6 : 4 }}">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('users_new') }}">Create new</a>
+    {% if isAdmin %}
+        <a href="{{ path('users_new') }}">Create new</a>
+    {% endif %}
 {% endblock %}
